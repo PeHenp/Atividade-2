@@ -1,1 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+typedef struct No {
+    char caractere;
+    struct No* proximo;
+} No;
+
+typedef struct {
+    No* topo;
+} Pilha;
+
+void inicializarPilha(Pilha* pilha) {
+    pilha->topo = NULL;
+}
+
+int isEmpty(Pilha* pilha) {
+    return pilha->topo == NULL;
+}
+
+void push(Pilha* pilha, char caractere) {
+    No* novoNo = (No*) malloc(sizeof(No));
+
+    if (novoNo == NULL) {
+        printf("Erro de alocacao de memoria\n");
+        exit(1);
+    }
+
+    novoNo->caractere = caractere;
+    novoNo->proximo = pilha->topo;
+    pilha->topo = novoNo;
+}
+
+char pop(Pilha* pilha) {
+    if (isEmpty(pilha)) {
+        return '\0';
+    }
+
+    No* noRemovido = pilha->topo;
+    char valor = noRemovido->caractere;
+
+    pilha->topo = noRemovido->proximo;
+    free(noRemovido);
+
+    return valor;
+}
+
+int simbolosCorrespondem(char abertura, char fechamento) {
+    return (abertura == '(' && fechamento == ')') ||
+           (abertura == '{' && fechamento == '}') ||
+           (abertura == '[' && fechamento == ']');
+}
+
+int expressaoEstaBalanceada(char* expressao) {
+    Pilha pilha;
+    inicializarPilha(&pilha);
+
+    int encontrouSimbolo = 0;
+
+    for (int i = 0; expressao[i] != '\0'; i++) {
+        char caractereAtual = expressao[i];
+
+        if (caractereAtual == '(' || caractereAtual == '{' || caractereAtual == '[') {
+            push(&pilha, caractereAtual);
+            encontrouSimbolo = 1;
+        }
+        else if (caractereAtual == ')' || caractereAtual == '}' || caractereAtual == ']') {
+            if (isEmpty(&pilha)) {
+                return 0;
+            }
+
+            char topo = pop(&pilha);
+
+            if (!simbolosCorrespondem(topo, caractereAtual)) {
+                return 0;
+            }
+        }
+    }
+
+    if (!encontrouSimbolo) return 0;
+
+    return isEmpty(&pilha);
+}
+
+int main() {
+    char expressaoValida[]   = "{[(a+b)*c]+d}";
+    char expressaoInvalida[] = "{[(a+b]*c)+d}";
+    char expressaoUsuario[200];
+
+    printf("Expressao: %s\n", expressaoValida);
+    printf("Resultado: %s\n\n",
+           expressaoEstaBalanceada(expressaoValida) ? "VALIDA" : "INVALIDA");
+
+    printf("Expressao: %s\n", expressaoInvalida);
+    printf("Resultado: %s\n\n",
+           expressaoEstaBalanceada(expressaoInvalida) ? "VALIDA" : "INVALIDA");
+
+    printf("Digite uma expressao: ");
+    fgets(expressaoUsuario, sizeof(expressaoUsuario), stdin);
+
+    expressaoUsuario[strcspn(expressaoUsuario, "\n")] = '\0';
+
+    printf("Expressao: %s\n", expressaoUsuario);
+    printf("Resultado: %s\n",
+           expressaoEstaBalanceada(expressaoUsuario) ? "VALIDA" : "INVALIDA");
+
+    return 0;
+}
