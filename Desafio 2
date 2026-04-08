@@ -1,1 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct No {
+    char caractere;
+    struct No* proximo;
+} No;
+
+typedef struct {
+    No* topo;
+} Pilha;
+
+void inicializarPilha(Pilha* pilha) {
+    pilha->topo = NULL;
+}
+
+int isEmpty(Pilha* pilha) {
+    return pilha->topo == NULL;
+}
+
+void push(Pilha* pilha, char caractere) {
+    No* novoNo = (No*) malloc(sizeof(No));
+
+    if (novoNo == NULL) {
+        printf("Erro de alocacao\n");
+        exit(1);
+    }
+
+    novoNo->caractere = caractere;
+    novoNo->proximo = pilha->topo;
+    pilha->topo = novoNo;
+}
+
+char pop(Pilha* pilha) {
+    if (isEmpty(pilha)) return '\0';
+
+    No* removido = pilha->topo;
+    char valor = removido->caractere;
+
+    pilha->topo = removido->proximo;
+    free(removido);
+
+    return valor;
+}
+
+int main() {
+    char string[200];
+
+    printf("Digite uma string: ");
+    fgets(string, sizeof(string), stdin);
+
+    string[strcspn(string, "\n")] = '\0';
+
+    Pilha pilha;
+    inicializarPilha(&pilha);
+
+    for (int i = 0; string[i] != '\0'; i++) {
+        push(&pilha, string[i]);
+    }
+
+    int i = 0;
+    while (!isEmpty(&pilha)) {
+        string[i++] = pop(&pilha);
+    }
+
+    string[i] = '\0';
+
+    printf("String invertida: %s\n", string);
+
+    return 0;
+}
 
